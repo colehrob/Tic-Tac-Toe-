@@ -7,15 +7,13 @@ export default function Welcome() {
     event.preventDefault();
 
     console.log("Player:", playerName);
-
-    // Later we'll navigate to the lobby.
   }
 
   return (
     <div>
       <h1>Tic-Tac-Toe Lobby</h1>
 
-      <p>Enter your name to continue.</p>
+      <p>Enter your name to continue</p>
 
       <form onSubmit={handleSubmit}>
         <input
@@ -24,11 +22,11 @@ export default function Welcome() {
           value={playerName}
           onChange={(event) => setPlayerName(event.target.value)}
         />
-
         <button type="submit">
           Continue
         </button>
       </form>
     </div>
-  );
+  )
+
 }
