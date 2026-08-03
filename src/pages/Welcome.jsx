@@ -1,6 +1,9 @@
+
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function Welcome() {
+  const navigate = useNavigate();
   const [playerName, setPlayerName] = useState("");
 
   function handleSubmit(event) {
@@ -22,8 +25,8 @@ export default function Welcome() {
           value={playerName}
           onChange={(event) => setPlayerName(event.target.value)}
         />
-        <button type="submit">
-          Continue
+        <button onClick={() => navigate("/lobby")}>
+          Let's go
         </button>
       </form>
     </div>
