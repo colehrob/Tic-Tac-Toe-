@@ -1,5 +1,7 @@
-import Welcome from "./pages/Welcome";
+import Game from "./pages/Game";
 
-export default function App() {
-  return <Welcome />;
+function App() {
+  return <Game />;
 }
+
+export default App;
