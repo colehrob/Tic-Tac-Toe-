@@ -3,6 +3,8 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
+const rooms = {};
+
 const app = express();
 
 // Allow requests from React
@@ -26,7 +28,9 @@ app.get("/", (req, res) => {
 // Socket.IO connection
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
+  socket.on("joinRoom", (roomCode) => {
 
+  });
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
   });

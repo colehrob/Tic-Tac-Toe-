@@ -13,6 +13,8 @@ function App() {
     socket.on("connect", () => {
       console.log("Connected:", socket.id);
     });
+    
+    socket.emit("joinRoom", "ABC123");
 
     return () => {
       socket.off("connect");
