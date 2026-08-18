@@ -1,14 +1,40 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Lobby() {
   const [gameAction, setGameAction] = useState(null);
   const [gameType, setGameType] = useState(null);
+  const navigate = useNavigate();
+
+  function handleGameType(type) {
+    setGameType(type);
+
+    if (gameAction === "create") {
+      navigate("/game", {
+        state: {
+          gameAction: "create",
+          gameType: type,
+        },
+      });
+    }
+
+    if (gameAction === "join") {
+      
+      if (type === "public") {
+        console.log("Show public games");
+      }
+
+      if (type === "private") {
+        console.log("Show room code input");
+      }
+    }
+  }
 
   return (
     <div>
       <h1>Game Lobby</h1>
 
-      {/* First prompt */}
+      {/* First question */}
       {!gameAction && (
         <div>
           <h2>What would you like to do?</h2>
@@ -23,7 +49,7 @@ function Lobby() {
         </div>
       )}
 
-      {/* Second prompt */}
+      {/* Second question */}
       {gameAction && !gameType && (
         <div>
           <h2>
@@ -32,23 +58,13 @@ function Lobby() {
               : "What type of game would you like to join?"}
           </h2>
 
-          <button onClick={() => setGameType("public")}>
+          <button onClick={() => handleGameType("public")}>
             Public
           </button>
 
-          <button onClick={() => setGameType("private")}>
+          <button onClick={() => handleGameType("private")}>
             Private
           </button>
-        </div>
-      )}
-
-      {/* What happens after choosing public/private */}
-      {gameType && (
-        <div>
-          <h2>
-            {gameAction === "create" ? "Creating" : "Joining"} a{" "}
-            {gameType} game...
-          </h2>
         </div>
       )}
     </div>

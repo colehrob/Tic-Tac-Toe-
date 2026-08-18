@@ -55,6 +55,13 @@ function Board({ xIsNext, squares, onPlay }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+
+  const [waiting, setWaiting] = useState(true);
+
+  // testing private mode (not hard-coded)
+  const [gameType, setGameType] = useState("private");
+  const [roomCode, setRoomCode] = useState("ABC123");
+
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -84,13 +91,34 @@ export default function Game() {
 
   return (
     <div className="game">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+
+      <div className="game-board-container">
+
+        <div className={waiting ? "game-board blurred" : "game-board"}>
+          <Board
+            xIsNext={xIsNext}
+            squares={currentSquares}
+            onPlay={handlePlay}
+          />
+        </div>
+
+        {waiting && (
+          <div className="waiting-overlay">
+            <h2>Waiting for opponent...</h2>
+
+            {gameType === "private" && (
+              <p>Room Code: {roomCode}</p>
+            )}
+          </div>
+        )}
+
       </div>
+
       <div className="game-info">
         <ol>{moves}</ol>
       </div>
-    </div>
+
+  </div>
   );
 }
 
