@@ -109,37 +109,3 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
-
-.game-board-container {
-  position: relative;
-  width: fit-content;
-}
-
-.blurred {
-  filter: blur(5px);
-}
-
-.waiting-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  background: rgba(255, 255, 255, 0.5);
-  z-index: 10;
-}
-
-.waiting-overlay h2 {
-  margin: 0;
-}
-
-.waiting-overlay p {
-  margin-top: 10px;
-  font-size: 1.2rem;
-}
