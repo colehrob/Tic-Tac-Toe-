@@ -9,11 +9,19 @@ function Lobby() {
 
   useEffect(() => {
     socket.on("gameCreated", () => {
-      navigate("/game");
+      navigate("/game", {
+        state: {
+          waiting: true,
+        },
+      });
     });
-
+    
     socket.on("gameStarted", () => {
-      navigate("/game");
+      navigate("/game", {
+        state: {
+          waiting: false,
+        },
+      });
     });
 
     socket.on("noGamesAvailable", () => {
