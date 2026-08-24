@@ -4,15 +4,14 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 const openGames = [];
+const activeGames = [];
 
 const app = express();
 
-// Allow requests from React
 app.use(cors());
 
 const server = http.createServer(app);
 
-// Attach Socket.IO to the HTTP server
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -20,12 +19,10 @@ const io = new Server(server, {
   },
 });
 
-// Test route
 app.get("/", (req, res) => {
   res.send("Server is running!");
 });
 
-// Socket.IO connection
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
@@ -33,19 +30,18 @@ io.on("connection", (socket) => {
   socket.on("createGame", () => {
     const roomId = socket.id;
 
-    // Put the player into their Socket.IO room
     socket.join(roomId);
 
-    // Add the game to the waiting queue
     openGames.push({
       roomId: roomId,
       players: [socket.id],
+      squares: Array(9).fill(null),
+      xIsNext: true,
     });
 
     console.log(`Game created: ${roomId}`);
     console.log("Open games:", openGames);
 
-    // Tell the player their game was created
     socket.emit("gameCreated", {
       roomId: roomId,
     });
@@ -53,47 +49,104 @@ io.on("connection", (socket) => {
 
   // JOIN GAME
   socket.on("joinGame", () => {
-    // No games waiting
     if (openGames.length === 0) {
       socket.emit("noGamesAvailable");
       return;
     }
 
-    // Get the first game in the queue
     const game = openGames[0];
 
-    // Add the new player
     game.players.push(socket.id);
 
-    // Put the new player into the same Socket.IO room
     socket.join(game.roomId);
 
     console.log(`Player ${socket.id} joined game ${game.roomId}`);
 
-    // Tell both players that the game has started
-    io.to(game.roomId).emit("gameStarted", {
+    // Move game from waiting → active
+    openGames.shift();
+    activeGames.push(game);
+
+    // Tell first player they are X
+    io.to(game.players[0]).emit("gameStarted", {
       roomId: game.roomId,
-      players: game.players,
+      player: "X",
     });
 
-    // Remove the game from the waiting queue
-    openGames.shift();
+    // Tell second player they are O
+    io.to(game.players[1]).emit("gameStarted", {
+      roomId: game.roomId,
+      player: "O",
+    });
 
     console.log("Open games:", openGames);
+    console.log("Active games:", activeGames);
+  });
+
+  // MAKE MOVE
+  socket.on("makeMove", ({ roomId, index }) => {
+    const game = activeGames.find(
+      (game) => game.roomId === roomId
+    );
+
+    if (!game) {
+      return;
+    }
+
+    // Don't allow occupied squares
+    if (game.squares[index] !== null) {
+      return;
+    }
+
+    const currentPlayer = game.xIsNext ? "X" : "O";
+
+    // Make sure the correct player is making the move
+    if (
+      (currentPlayer === "X" && socket.id !== game.players[0]) ||
+      (currentPlayer === "O" && socket.id !== game.players[1])
+    ) {
+      return;
+    }
+
+    // Update board
+    game.squares[index] = currentPlayer;
+
+    // Switch turns
+    game.xIsNext = !game.xIsNext;
+
+    // Send updated state to both players
+    io.to(game.roomId).emit("gameState", {
+      squares: game.squares,
+      xIsNext: game.xIsNext,
+    });
   });
 
   // DISCONNECT
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
 
-    // Remove any game created by this player
-    const index = openGames.findIndex(
+    // Remove waiting game
+    const openIndex = openGames.findIndex(
       (game) => game.players.includes(socket.id)
     );
 
-    if (index !== -1) {
-      openGames.splice(index, 1);
+    if (openIndex !== -1) {
+      openGames.splice(openIndex, 1);
       console.log("Removed abandoned game from queue.");
+    }
+
+    // Remove active game
+    const activeIndex = activeGames.findIndex(
+      (game) => game.players.includes(socket.id)
+    );
+
+    if (activeIndex !== -1) {
+      const game = activeGames[activeIndex];
+
+      io.to(game.roomId).emit("opponentDisconnected");
+
+      activeGames.splice(activeIndex, 1);
+
+      console.log("Removed active game.");
     }
   });
 });
