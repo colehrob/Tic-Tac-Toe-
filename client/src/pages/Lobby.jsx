@@ -8,26 +8,31 @@ function Lobby() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on("gameCreated", () => {
+    socket.on("gameCreated", ({ roomId }) => {
       navigate("/game", {
         state: {
           waiting: true,
+          roomId: roomId,
         },
       });
     });
     
-    socket.on("gameStarted", () => {
+    socket.on("gameStarted", ({ roomId, player }) => {
+      console.log("LOBBY RECEIVED PLAYER:", player);
+      
       navigate("/game", {
         state: {
           waiting: false,
+          roomId: roomId,
+          player: player,
         },
       });
     });
-
+  
     socket.on("noGamesAvailable", () => {
       alert("There are no games available right now.");
     });
-
+  
     return () => {
       socket.off("gameCreated");
       socket.off("gameStarted");

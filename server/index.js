@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
 
   // CREATE GAME
   socket.on("createGame", () => {
-    const roomId = socket.id;
+    const roomId = `game-${socket.id}`;
 
     socket.join(roomId);
 
@@ -84,26 +84,36 @@ io.on("connection", (socket) => {
 
   // MAKE MOVE
   socket.on("makeMove", ({ roomId, index }) => {
+    console.log("MOVE RECEIVED");
+    console.log("Player:", socket.id);
+    console.log("Room:", roomId);
+    console.log("Index:", index);
+
     const game = activeGames.find(
       (game) => game.roomId === roomId
     );
 
     if (!game) {
+      console.log("GAME NOT FOUND");
       return;
     }
 
     // Don't allow occupied squares
     if (game.squares[index] !== null) {
+      console.log("SQUARE ALREADY OCCUPIED");
       return;
     }
 
     const currentPlayer = game.xIsNext ? "X" : "O";
+
+    console.log("Current player:", currentPlayer);
 
     // Make sure the correct player is making the move
     if (
       (currentPlayer === "X" && socket.id !== game.players[0]) ||
       (currentPlayer === "O" && socket.id !== game.players[1])
     ) {
+      console.log("NOT THIS PLAYER'S TURN");
       return;
     }
 
@@ -112,6 +122,8 @@ io.on("connection", (socket) => {
 
     // Switch turns
     game.xIsNext = !game.xIsNext;
+
+    console.log("UPDATED GAME:", game);
 
     // Send updated state to both players
     io.to(game.roomId).emit("gameState", {
