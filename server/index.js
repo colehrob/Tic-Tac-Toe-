@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
     const game = activeGames.find(
       (game) => game.roomId === roomId
     );
-
+    
     if (!game) {
       console.log("GAME NOT FOUND");
       return;

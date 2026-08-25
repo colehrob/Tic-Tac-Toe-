@@ -129,11 +129,16 @@ export default function Game() {
     if (waiting) {
       return;
     }
-
+  
+    // Stop all moves if somebody has already won
+    if (calculateWinner(squares)) {
+      return;
+    }
+  
     if (squares[i]) {
       return;
     }
-
+  
     if (
       (xIsNext && myPlayer !== "X") ||
       (!xIsNext && myPlayer !== "O")
@@ -141,9 +146,9 @@ export default function Game() {
       console.log("STOPPED: not your turn");
       return;
     }
-
+  
     console.log("Sending move to server");
-
+  
     socket.emit("makeMove", {
       roomId: roomId,
       index: i,
